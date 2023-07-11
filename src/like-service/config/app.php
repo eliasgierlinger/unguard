@@ -15,9 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'auth_service_url' => 'http://'.
-                            getenv('UNGUARD_USER_AUTH_SERVICE_ADDRESS').
-                            '/auth/isValid/',
+    'auth_service_url' => 'http://' .
+        getenv('UNGUARD_USER_AUTH_SERVICE_ADDRESS') .
+        '/auth/isValid/',
 
     /*
     |--------------------------------------------------------------------------
@@ -43,7 +43,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -57,7 +57,6 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost:8000'),
-
 
 
     'asset_url' => env('ASSET_URL', null),
