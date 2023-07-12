@@ -58,6 +58,12 @@ return [
 
     'url' => env('APP_URL', 'http://localhost:8000'),
 
+    'mariadbHost' => env('DB_Host', 'unguard-mariadb'),
+    'mariadbUser' => env('DB_USERNAME', 'root'),
+    'mariadbPassword' => env('DB_PASSWORD', 'abc123'),
+    'mariadbAddress' => getenv('UNGUARD_MARIADB_PORT_3306_TCP_PORT', false),
+    //tet
+
 
     'asset_url' => env('ASSET_URL', null),
 
