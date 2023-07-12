@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use PDO;
+use PDOException;
 
 class CreateDatabase extends Command
 {
@@ -39,20 +40,17 @@ class CreateDatabase extends Command
      */
     public function handle()
     {
-        $host = config('app.mariadbHost', '10.107.252.229:3306');
-        $rootuser = config('app.mariadbUser', 'root');
-        $password = config('app.mariadbPassword', 'no t');
+        $host = getenv('UNGUARD_MARIADB_SERVICE_HOST', false) . ':' . getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false);
+        $rootuser = 'root';
+        $password = getenv('MARIADB_PASSWORD', false);
 
-        Log::notice(phpinfo());
-
-        Log::notice('Passwordcheck: ' . $password);
-        Log::notice('Addresscheck:' . config('app.mariadbAddress'));
+        Log::notice('Addresscheck:' . $host);
 
         $connection = new PDO("mysql:host=$host", $rootuser, $password);
         try{
-            //$connection->exec('CREATE DATABASE likeDb');
+            $connection->exec('CREATE DATABASE likeDb');
         }catch(PDOException $e){
-            Log::notice('Exception');
+            Log::notice('Exception, probably due to database "likeDb" already existing');
         }
 
 
