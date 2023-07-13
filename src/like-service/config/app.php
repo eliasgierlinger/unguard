@@ -58,11 +58,6 @@ return [
 
     'url' => env('APP_URL', 'http://localhost:8000'),
 
-    'mariadbUser' => getenv('DB_USERNAME', false),
-    'mariadbPassword' => getenv('MARIADB_PASSWORD', false),
-    'mariadbHost' => getenv('UNGUARD_MARIADB_SERVICE_HOST', false) . ':' . getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false),
-
-
     'asset_url' => env('ASSET_URL', null),
 
     /*

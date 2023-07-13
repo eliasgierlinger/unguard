@@ -22,6 +22,7 @@ EXPOSE 8000
 #Fixes error while connecting since laravel requires a key
 RUN php artisan --env=local key:generate
 
+#MySqlDriver
 RUN docker-php-ext-install mysqli pdo pdo_mysql;
 
 #Fixes error while accessing enviroment variables

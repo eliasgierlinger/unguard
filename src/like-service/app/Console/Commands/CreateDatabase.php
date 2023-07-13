@@ -44,15 +44,14 @@ class CreateDatabase extends Command
         $port = getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false);
         $rootuser = 'root';
         $password = getenv('MARIADB_PASSWORD', false);
-        $address =$host .":". $port;
+        $address = $host . ":" . $port;
 
         $connection = new PDO("mysql:host=$address", $rootuser, $password);
-        try{
+        try {
             $connection->exec('CREATE DATABASE likeDb');
-        }catch(PDOException $e){
-            Log::notice('Exception, probably due to database "likeDb" already existing');
+        } catch (PDOException $e) {
+            Log::notice('PDO-Exception, probably due to database "likeDb" already existing');
         }
-
-
+        return 0;
     }
 }
