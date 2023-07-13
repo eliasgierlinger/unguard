@@ -41,10 +41,16 @@ class CreateDatabase extends Command
     public function handle()
     {
         $host = getenv('UNGUARD_MARIADB_SERVICE_HOST', false) . ':' . getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false);
+        $port = getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false);
+
         $rootuser = 'root';
         $password = getenv('MARIADB_PASSWORD', false);
 
+        apache_setenv('DB_HOST', $host);
+        apache_setenv('DB_USERNAME', $rootuser);
+
         Log::notice('Addresscheck:' . $host);
+        Log::notice(phpinfo());
 
         $connection = new PDO("mysql:host=$host", $rootuser, $password);
         try{
