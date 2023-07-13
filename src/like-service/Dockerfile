@@ -27,7 +27,10 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql;
 #Fixes error while accessing enviroment variables
 RUN php artisan --env=local config:clear
 
-#RUN php artisan migrate --force
+RUN php artisan --env=local optimize:clear
 
-CMD php artisan --env=local make:database; php artisan --env=local serve --host=0.0.0.0 --port=8000
+RUN php /usr/bin/composer dump-autoload
 
+RUN php /usr/bin/composer clear-cache
+
+CMD php artisan --env=local make:database && php artisan migrate:fresh --force && php artisan --env=local serve --host=0.0.0.0 --port=8000

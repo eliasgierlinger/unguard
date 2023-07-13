@@ -40,19 +40,13 @@ class CreateDatabase extends Command
      */
     public function handle()
     {
-        $host = getenv('UNGUARD_MARIADB_SERVICE_HOST', false) . ':' . getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false);
+        $host = getenv('UNGUARD_MARIADB_SERVICE_HOST', false);
         $port = getenv('UNGUARD_MARIADB_SERVICE_PORT_MYSQL', false);
-
         $rootuser = 'root';
         $password = getenv('MARIADB_PASSWORD', false);
+        $address =$host .":". $port;
 
-        apache_setenv('DB_HOST', $host);
-        apache_setenv('DB_USERNAME', $rootuser);
-
-        Log::notice('Addresscheck:' . $host);
-        Log::notice(phpinfo());
-
-        $connection = new PDO("mysql:host=$host", $rootuser, $password);
+        $connection = new PDO("mysql:host=$address", $rootuser, $password);
         try{
             $connection->exec('CREATE DATABASE likeDb');
         }catch(PDOException $e){
