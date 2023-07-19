@@ -34,7 +34,8 @@ class LikeController extends BaseController
         }
     }
 
-    function getLikeCountAndState($request){
+    function getLikeCountAndState($request)
+    {
         $user_token = $request->cookie('jwt');
         $postId = $request->header('postId');
 
@@ -45,7 +46,7 @@ class LikeController extends BaseController
         } else {
             $userId = $userId = $this->extractUserIdFromToken($user_token);
 
-            $count = DB::table('like') ->where('postId', '=', $postId) ->count('*');
+            $count = DB::table('like')->where('postId', '=', $postId)->count('*');
             $userLiked = DB::table('like')->where('userId', '=', $userId)->where('postId', '=', $postId)->count('*') > 0;
 
             return response()->json([
@@ -55,7 +56,8 @@ class LikeController extends BaseController
         }
     }
 
-    function removeLike($request){
+    function removeLike($request)
+    {
         $user_token = $request->cookie('jwt');
         $postId = $request->header('postId');
 
@@ -89,7 +91,8 @@ class LikeController extends BaseController
         return $responseCode == 200;
     }
 
-    function extractUserIdFromToken($jwt){
+    function extractUserIdFromToken($jwt)
+    {
         $jwtPayload = explode(".", $jwt, 3)[1];
         $jsonJwtPayload = base64_decode($jwtPayload);
         $payloadArray = json_decode($jsonJwtPayload, true);
