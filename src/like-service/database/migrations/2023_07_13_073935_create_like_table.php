@@ -14,9 +14,9 @@ class CreateLikeTable extends Migration
     public function up()
     {
         Schema::create('like', function (Blueprint $table) {
+            $table->id('likeId', true);
             $table->integer('postId', false);
-            $table->integer('UserId', false);
-            $table->primary(['postId', 'UserId']);
+            $table->integer('userId', false);
         });
     }
 

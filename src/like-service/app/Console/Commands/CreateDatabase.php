@@ -45,12 +45,13 @@ class CreateDatabase extends Command
         $rootuser = 'root';
         $password = getenv('MARIADB_PASSWORD', false);
         $address = $host . ":" . $port;
+        $dbName = getenv('DB_DATABASE', false);
 
         $connection = new PDO("mysql:host=$address", $rootuser, $password);
         try {
-            $connection->exec('CREATE DATABASE likeDb');
+            $connection->exec("CREATE DATABASE $dbName");
         } catch (PDOException $e) {
-            Log::notice('PDO-Exception, probably due to database "likeDb" already existing');
+            Log::notice("PDO-Exception, probably due to database $dbName already existing", [$e]);
         }
         return 0;
     }
