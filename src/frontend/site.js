@@ -48,6 +48,8 @@ router.post('/bio/:username', postBio);
 //Membership
 router.get('/membership', showMembership);
 router.post('/membership/:username', postMembership);
+//Like
+router.get('/like-post', postLike);
 
 router.use('/ad-manager', adManagerRouter);
 
@@ -298,7 +300,7 @@ function getPost(req, res) {
     const postId = req.params.postid;
     let count = 0;
 
-    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/like-count`)).then((response => {
+    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/ping`)).then((response => { //todo /like-count
         let countData = response.data;
         count = countData.likeCount;
     }))
@@ -341,6 +343,15 @@ function postBio(req, res) {
             res.status(statusCodeForError(error)).render('error.njk', handleError(error));
         });
 }
+
+function postLike(req, res) {
+    console.log("Something");
+    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/ping`)).then((response => { //todo /like-count
+        let countData = response.data;
+        count = countData.likeCount;
+    }));
+}
+
 
 /**
  * Creates a new Promise and performs base request before the one specified, this is useful to match the synchronous nature of
