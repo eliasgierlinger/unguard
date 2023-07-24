@@ -47,6 +47,7 @@ const adServiceApiLogger = microserviceLoggerFactory.create('AD_SERVICE_API');
 const membershipServiceApiLogger = microserviceLoggerFactory.create('MEMBERSHIP_SERVICE_API');
 const statusServiceApiLogger = microserviceLoggerFactory.create('STATUS_SERVICE_API');
 const profileServiceLogger = microserviceLoggerFactory.create('PROFILE_SERVICE_API');
+const likeServiceLogger = microserviceLoggerFactory.create('LIKE_SERVICE_API')
 
 // log all environment variables
 frontendLogger.info("JAEGER_SERVICE_NAME is set to " + process.env.JAEGER_SERVICE_NAME);
@@ -62,6 +63,7 @@ frontendLogger.info("FRONTEND_BASE_PATH is set to " + process.env.FRONTEND_BASE_
 frontendLogger.info("AD_SERVICE_BASE_PATH is set to " + process.env.AD_SERVICE_BASE_PATH);
 frontendLogger.info("STATUS_SERVICE_BASE_PATH is set to " + process.env.STATUS_SERVICE_BASE_PATH);
 frontendLogger.info("PROFILE_SERVICE_ADDRESS is set to " + process.env.PROFILE_SERVICE_ADDRESS);
+frontendLogger.info("LIKE_SERVICE_ADDRESS is set to " + process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT);
 
 let app = express();
 
@@ -142,6 +144,8 @@ app.use((req, res, next) => {
     const MEMBERSHIP_SERVICE_API = createAxiosInstance(req, "http://" + process.env.MEMBERSHIP_SERVICE_ADDRESS + process.env.MEMBERSHIP_SERVICE_BASE_PATH, membershipServiceApiLogger, cookieHeader)
     const PROFILE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.PROFILE_SERVICE_ADDRESS, profileServiceLogger);
     const STATUS_SERVICE_API =createAxiosInstance(req, "http://" + process.env.STATUS_SERVICE_ADDRESS + process.env.STATUS_SERVICE_BASE_PATH, statusServiceApiLogger);
+    const LIKE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.LIKE_SERVICE_ADDRESS, likeServiceLogger, cookieHeader);
+    //process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT
 
 	applyTracingInterceptors(MICROBLOG_API, {span: req.span});
 	applyTracingInterceptors(PROXY, {span: req.span});
@@ -149,6 +153,7 @@ app.use((req, res, next) => {
 	applyTracingInterceptors(AD_SERVICE_API, {span: req.span});
 	applyTracingInterceptors(STATUS_SERVICE_API, {span: req.span});
     applyTracingInterceptors(PROFILE_SERVICE_API, {span: req.span});
+    applyTracingInterceptors(LIKE_SERVICE_API, {span: req.span});
 
     req.MICROBLOG_API = MICROBLOG_API;
     req.PROXY = PROXY;
@@ -157,6 +162,7 @@ app.use((req, res, next) => {
     req.MEMBERSHIP_SERVICE_API = MEMBERSHIP_SERVICE_API;
     req.STATUS_SERVICE_API = STATUS_SERVICE_API;
     req.PROFILE_SERVICE_API = PROFILE_SERVICE_API;
+    req.LIKE_SERVICE_API = LIKE_SERVICE_API;
 
     next();
 });

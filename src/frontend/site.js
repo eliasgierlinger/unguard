@@ -296,10 +296,20 @@ function createPost(req, res) {
 
 function getPost(req, res) {
     const postId = req.params.postid;
+    let count = 0;
+
+    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/like-count`)).then((response => {
+        let countData = response.data;
+        count = countData.likeCount;
+    }))
+
     fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {
 
+        let postData = response.data;
+        postData = {...postData, likeCount: "10"};
+
         let data = extendRenderData({
-            post: response.data,
+            post: postData,
             username: getJwtUser(req.cookies),
             isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
             baseData: baseRequestFactory.baseData
