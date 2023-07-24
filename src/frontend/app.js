@@ -144,8 +144,8 @@ app.use((req, res, next) => {
     const MEMBERSHIP_SERVICE_API = createAxiosInstance(req, "http://" + process.env.MEMBERSHIP_SERVICE_ADDRESS + process.env.MEMBERSHIP_SERVICE_BASE_PATH, membershipServiceApiLogger, cookieHeader)
     const PROFILE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.PROFILE_SERVICE_ADDRESS, profileServiceLogger);
     const STATUS_SERVICE_API =createAxiosInstance(req, "http://" + process.env.STATUS_SERVICE_ADDRESS + process.env.STATUS_SERVICE_BASE_PATH, statusServiceApiLogger);
-    const LIKE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.LIKE_SERVICE_ADDRESS, likeServiceLogger, cookieHeader);
-    //process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT
+    const LIKE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT, likeServiceLogger, cookieHeader);
+
 
 	applyTracingInterceptors(MICROBLOG_API, {span: req.span});
 	applyTracingInterceptors(PROXY, {span: req.span});
