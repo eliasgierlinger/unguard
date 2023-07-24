@@ -1,5 +1,7 @@
 <?php
 
+namespace app\Http\Controllers;
+
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -21,7 +23,7 @@ class LikeController extends BaseController
             return response()->json([
                 'message' => 'Unauthorized'
             ], 401);
-        } else {
+        }
             $userId = $this->extractUserIdFromToken($user_token);
 
             DB::table('like')->insert([
@@ -31,7 +33,6 @@ class LikeController extends BaseController
             return response()->json([
                 'message' => 'Authorized'
             ], 200);
-        }
     }
 
     function getLikeCountAndState($request)
@@ -43,7 +44,7 @@ class LikeController extends BaseController
             return response()->json([
                 'message' => 'Unauthorized'
             ], 401);
-        } else {
+        }
             $userId = $userId = $this->extractUserIdFromToken($user_token);
 
             $count = DB::table('like')->where('postId', '=', $postId)->count('*');
@@ -53,28 +54,38 @@ class LikeController extends BaseController
                 'likeCount' => $count,
                 'userLiked' => $userLiked
             ], 200);
-        }
     }
-
+    /*
+        * Function removeLike is vulnerable to SQL-Injection-Attacks.
+        * When "postId" is an array, all contents of the array are added to the SQL-Bindings of the subsequent query.
+        * This means that, when passing an array it is possible to manipulate the userId value of the query -> unlike another user's like.
+ */
     function removeLike($request)
     {
         $user_token = $request->cookie('jwt');
-        $postId = $request->header('postId');
+        $postId = $request->input('postId');
 
         if (!$this->validateToken($user_token)) {
             return response()->json([
                 'message' => 'Unauthorized'
             ], 401);
-        } else {
+        }
             $userId = $userId = $this->extractUserIdFromToken($user_token);
 
-            $likeId = DB::table('like')->where('userId', '=', $userId)->where('postId', '=', $postId)->min('likeId');
-            DB::table('like')->where('likeId', '=', $likeId)->delete();
+            $query = DB::table('like')->where([
+                ['postId', '=', $postId],
+                ['userId', '=', $userId],
+            ]);
+
+            //fixes error when too many values are bound
+            $bindings = $query->getBindings();
+            $bindings = array_slice($bindings, 0, 2);
+
+            $query->setBindings($bindings)->delete();
 
             return response()->json([
-                'likeId' => $likeId,
+                'userId' => $userId,
             ], 200);
-        }
     }
 
     function validateToken($user_token)
