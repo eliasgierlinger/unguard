@@ -24,15 +24,15 @@ class LikeController extends BaseController
                 'message' => 'Unauthorized'
             ], 401);
         }
-            $userId = $this->extractUserIdFromToken($user_token);
+        $userId = $this->extractUserIdFromToken($user_token);
 
-            DB::table('like')->insert([
-                'userId' => $userId,
-                'postId' => $postId
-            ]);
-            return response()->json([
-                'message' => 'Authorized'
-            ], 200);
+        DB::table('like')->insert([
+            'userId' => $userId,
+            'postId' => $postId
+        ]);
+        return response()->json([
+            'message' => 'Authorized'
+        ], 200);
     }
 
     function getLikeCountAndState($request)
@@ -45,16 +45,17 @@ class LikeController extends BaseController
                 'message' => 'Unauthorized'
             ], 401);
         }
-            $userId = $userId = $this->extractUserIdFromToken($user_token);
+        $userId = $userId = $this->extractUserIdFromToken($user_token);
 
-            $count = DB::table('like')->where('postId', '=', $postId)->count('*');
-            $userLiked = DB::table('like')->where('userId', '=', $userId)->where('postId', '=', $postId)->count('*') > 0;
+        $count = DB::table('like')->where('postId', '=', $postId)->count('*');
+        $userLiked = DB::table('like')->where('userId', '=', $userId)->where('postId', '=', $postId)->count('*') > 0;
 
-            return response()->json([
-                'likeCount' => $count,
-                'userLiked' => $userLiked
-            ], 200);
+        return response()->json([
+            'likeCount' => $count,
+            'userLiked' => $userLiked
+        ], 200);
     }
+
     /*
         * Function removeLike is vulnerable to SQL-Injection-Attacks.
         * When "postId" is an array, all contents of the array are added to the SQL-Bindings of the subsequent query.
@@ -70,22 +71,22 @@ class LikeController extends BaseController
                 'message' => 'Unauthorized'
             ], 401);
         }
-            $userId = $userId = $this->extractUserIdFromToken($user_token);
+        $userId = $userId = $this->extractUserIdFromToken($user_token);
 
-            $query = DB::table('like')->where([
-                ['postId', '=', $postId],
-                ['userId', '=', $userId],
-            ]);
+        $query = DB::table('like')->where([
+            ['postId', '=', $postId],
+            ['userId', '=', $userId],
+        ]);
 
-            //fixes error when too many values are bound
-            $bindings = $query->getBindings();
-            $bindings = array_slice($bindings, 0, 2);
+        //fixes error when too many values are bound
+        $bindings = $query->getBindings();
+        $bindings = array_slice($bindings, 0, 2);
 
-            $query->setBindings($bindings)->delete();
+        $query->setBindings($bindings)->delete();
 
-            return response()->json([
-                'userId' => $userId,
-            ], 200);
+        return response()->json([
+            'userId' => $userId,
+        ], 200);
     }
 
     function validateToken($user_token)
