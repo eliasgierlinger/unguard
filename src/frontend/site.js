@@ -69,7 +69,7 @@ function showGlobalTimeline(req, res) {
                 membership: membership.data.membership
 
             }, req);
-
+            console.log(data);
             res.render('index.njk', data)
         }, (err) => displayError(err, res));
 }
@@ -300,15 +300,25 @@ function getPost(req, res) {
     const postId = req.params.postid;
     let count = 0;
 
-    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/ping`)).then((response => { //todo /like-count
+    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/like-count`, {
+            headers: {
+                "Content-Type": "application/json",
+                'postId': postId,
+            }
+        }
+        )).then((response => { //todo /like-count
         let countData = response.data;
+        console.log(countData);
         count = countData.likeCount;
-    }))
+        console.log(count);
 
-    fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {
+
+    console.log(count);
+
+    fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {//
 
         let postData = response.data;
-        postData = {...postData, likeCount: "10"};
+        postData = {...postData, likeCount: count};
 
         let data = extendRenderData({
             post: postData,
@@ -318,7 +328,7 @@ function getPost(req, res) {
         }, req);
 
         res.render('singlepost.njk', data);
-    }, (err) => displayError(err, res));
+    }, (err) => displayError(err, res)) }));
 }
 
 function postMembership(req, res) {

@@ -40,6 +40,7 @@ class LikeController extends BaseController
         $user_token = $request->cookie('jwt');
         $postId = $request->header('postId');
 
+        DB::enableQueryLog();
         if (!$this->validateToken($user_token)) {
             return response()->json([
                 'message' => 'Unauthorized'
@@ -49,6 +50,8 @@ class LikeController extends BaseController
 
         $count = DB::table('like')->where('postId', '=', $postId)->count('*');
         $userLiked = DB::table('like')->where('userId', '=', $userId)->where('postId', '=', $postId)->count('*') > 0;
+
+        Log::notice(DB::getQueryLog());;
 
         return response()->json([
             'likeCount' => $count,
