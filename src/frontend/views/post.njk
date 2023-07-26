@@ -44,9 +44,10 @@ limitations under the License.
             </div>
         </div>
     </div>
-
-      <div class="card-footer">
-            {{ post.likeCount }} <img class="rounded-circle" src="{{ extendURL('/img/thumb_up.png') }}">
-        </div>
+    <div class="card-footer">
+        {{ post.likeCount }} <img class="rounded-circle" width="20" src="{{ extendURL('/img/thumb_up.png') }}">
+        <div class="col-md-6"><button class="btn btn-primary" formaction="{{ extendURL('/like') }}" type="submit" style="width: 100%;" name="like">like</button></div>
     </div>
 </div>
+
+

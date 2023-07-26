@@ -126,7 +126,9 @@ public class MicroblogController {
 
         if (!userAuthServiceClient.checkTokenValidity(jwt)) throw new InvalidJwtException();
 
-        return redisClient.getUserPosts(jwt, user, Integer.parseInt(limit));
+        List<Post> postList = redisClient.getUserPosts(jwt, user, Integer.parseInt(limit));
+        logger.info(postList.get(1).getPostId());
+        return postList;
     }
 
     @GetMapping("/users/{user}/followers")
@@ -154,7 +156,7 @@ public class MicroblogController {
         if (post == null) {
             throw new ResponseStatusException(NOT_FOUND, "Post not found.");
         }
-        postSerializer.serializePost(new SerializedPost(post.getUsername(), post.getBody(), post.getImageUrl(), post.getTimestamp(), UUID.randomUUID()));
+        postSerializer.serializePost(new SerializedPost(post.getUsername(), post.getBody(), post.getImageUrl(), post.getTimestamp(), postId, UUID.randomUUID()));
         return post;
     }
 

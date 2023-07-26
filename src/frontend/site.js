@@ -49,19 +49,22 @@ router.post('/bio/:username', postBio);
 router.get('/membership', showMembership);
 router.post('/membership/:username', postMembership);
 //Like
-router.get('/like-post', postLike);
+router.get('/like', postLike);
 
 router.use('/ad-manager', adManagerRouter);
 
-function showGlobalTimeline(req, res) {
+async function showGlobalTimeline(req, res) {
     fetchUsingDeploymentBase(req, () =>
         Promise.all([
             req.MICROBLOG_API.get('/timeline'),
             getMembershipOfLoggedInUser(req)
         ]))
-        .then(([timeline, membership]) => {
+        .then(async ([timeline, membership]) => {
+            let postArray = timeline.data;
+            postArray = await insertLikeCountIntoPostArray(req, postArray);
+
             let data = extendRenderData({
-                data: timeline.data,
+                data: postArray,
                 title: 'Timeline',
                 username: getJwtUser(req.cookies),
                 isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
@@ -74,22 +77,27 @@ function showGlobalTimeline(req, res) {
         }, (err) => displayError(err, res));
 }
 
-function showPersonalTimeline(req, res) {
+async function showPersonalTimeline(req, res) {
     fetchUsingDeploymentBase(req, () =>
         Promise.all([
             req.MICROBLOG_API.get('/mytimeline'),
             getMembershipOfLoggedInUser(req)
         ]))
-        .then(([myTimeline, membership]) => {
+        .then(async ([myTimeline, membership]) => {
+            console.log("Start Data: " + myTimeline.data);
+            let postArray = myTimeline.data;//
+            postArray = await insertLikeCountIntoPostArray(req, postArray);
+            console.log("Final Data: " + JSON.stringify(postArray));
+
             let data = extendRenderData({
-                data: myTimeline.data,
+                data: postArray,
                 title: 'My Timeline',
                 username: getJwtUser(req.cookies),
                 isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
                 baseData: baseRequestFactory.baseData,
                 membership: membership.data.membership
             }, req);
-
+            console.log("Put in Data: " + JSON.stringify(data));
             res.render('index.njk', data);
         }, (err) => displayError(err, res));
 }
@@ -296,39 +304,27 @@ function createPost(req, res) {
     }
 }
 
-function getPost(req, res) {
+async function getPost(req, res) {
     const postId = req.params.postid;
-    let count = 0;
+    const likeCount = await getLikeCount(req, postId)
+    console.log(likeCount);
 
-    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/like-count`, {
-            headers: {
-                "Content-Type": "application/json",
-                'postId': postId,
-            }
-        }
-        )).then((response => { //todo /like-count
-        let countData = response.data;
-        console.log(countData);
-        count = countData.likeCount;
-        console.log(count);
+        fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {//
 
+            console.log(likeCount);
+            let postData = response.data;
+            postData = {...postData, likeCount: likeCount};
 
-    console.log(count);
+            console.log(likeCount);
+            let data = extendRenderData({
+                post: postData,
+                username: getJwtUser(req.cookies),
+                isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
+                baseData: baseRequestFactory.baseData
+            }, req);
 
-    fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {//
-
-        let postData = response.data;
-        postData = {...postData, likeCount: count};
-
-        let data = extendRenderData({
-            post: postData,
-            username: getJwtUser(req.cookies),
-            isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
-            baseData: baseRequestFactory.baseData
-        }, req);
-
-        res.render('singlepost.njk', data);
-    }, (err) => displayError(err, res)) }));
+            res.render('singlepost.njk', data);
+        }, (err) => displayError(err, res))
 }
 
 function postMembership(req, res) {
@@ -362,8 +358,41 @@ function postLike(req, res) {
     }));
 }
 
+async function getLikeCount(req, postId){
+    return new Promise((resolve, reject)=>{
+        fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/like-count`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    'postId': postId,
+                }
+            }
+        )).then((response => {
+            let countData = response.data;
+            resolve(countData.likeCount);
+        }))
+    })
 
-/**
+}
+
+async function insertLikeCountIntoPostArray(req, data){
+    return new Promise(async (resolve, reject) => {
+        let finalData = [];
+        await Promise.all(
+            data.map(async (post) => {
+            let postId = post.postId;
+            let likeCount = await getLikeCount(req, postId);
+            post = {...post, likeCount: likeCount};
+            console.log("Post: "+ JSON.stringify(post));
+            finalData.push(post);
+        })).then(() => {
+            console.log(JSON.stringify(finalData));
+            resolve(finalData);
+        })
+    })
+}
+
+
+/**-
  * Creates a new Promise and performs base request before the one specified, this is useful to match the synchronous nature of
  * nunjucks, allowing microservice failures to not affect base requests. e.g deployment service requests will always succeed
  * regardless if login fails.

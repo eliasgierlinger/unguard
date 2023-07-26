@@ -55,4 +55,6 @@ public class Post {
     public String getImageUrl() {
         return imageUrl;
     }
+
+    public String getPostId(){ return postId; };
 }

@@ -30,8 +30,9 @@ public class SerializedPost extends Post {
 			@JsonProperty("body") String body,
 			@JsonProperty("imageUrl") String imageUrl,
 			@JsonProperty("timestamp") Date timestamp,
+            @JsonProperty("postId") String postId,
 			@JsonProperty("serialId") UUID serialId) {
-		super(username, body, imageUrl, timestamp);
+		super(username, body, imageUrl, timestamp, postId);
 		this.serialId = serialId;
 	}
 
