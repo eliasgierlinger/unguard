@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const { handleError, statusCodeForError } = require("./controller/errorHandler");
-const { getJwtUser, hasJwtRole, getJwtUserId } = require('./controller/cookie');
-const { roles } = require('./model/role');
-const { extendURL, extendRenderData } = require("./controller/utilities.js");
+const {handleError, statusCodeForError} = require("./controller/errorHandler");
+const {getJwtUser, hasJwtRole, getJwtUserId} = require('./controller/cookie');
+const {roles} = require('./model/role');
+const {extendURL, extendRenderData} = require("./controller/utilities.js");
 
 const adManagerRouter = require('./controller/adManager');
 
@@ -49,7 +49,7 @@ router.post('/bio/:username', postBio);
 router.get('/membership', showMembership);
 router.post('/membership/:username', postMembership);
 //Like
-router.get('/like', postLike);
+router.post('/like/:postId', postLike);
 
 router.use('/ad-manager', adManagerRouter);
 
@@ -72,7 +72,6 @@ async function showGlobalTimeline(req, res) {
                 membership: membership.data.membership
 
             }, req);
-            console.log(data);
             res.render('index.njk', data)
         }, (err) => displayError(err, res));
 }
@@ -97,7 +96,6 @@ async function showPersonalTimeline(req, res) {
                 baseData: baseRequestFactory.baseData,
                 membership: membership.data.membership
             }, req);
-            console.log("Put in Data: " + JSON.stringify(data));
             res.render('index.njk', data);
         }, (err) => displayError(err, res));
 }
@@ -132,14 +130,14 @@ function getBioText(req, username) {
                 .then((response) => {
                     resolve(response.data.bioText);
                 }).catch(reason => {
-                    // If a bio for the userId doesn't exist yet and a status code 404 is returned, this catch block will set
-                    // the bioText to an empty string which allows for the profile page to be displayed rather than the error page
-                    if (statusCodeForError(reason) === 404) {
-                        resolve("");
-                    } else {
-                        reject(reason)
-                    }
-                })
+                // If a bio for the userId doesn't exist yet and a status code 404 is returned, this catch block will set
+                // the bioText to an empty string which allows for the profile page to be displayed rather than the error page
+                if (statusCodeForError(reason) === 404) {
+                    resolve("");
+                } else {
+                    reject(reason)
+                }
+            })
         });
     });
 }
@@ -199,7 +197,7 @@ function doLogin(req, res) {
     const usernameToLogin = req.body.username;
     const passwordToLogin = req.body.password;
     if (!usernameToLogin || !passwordToLogin) {
-        res.render('error.njk', { error: "Username and password must be supplied to login" });
+        res.render('error.njk', {error: "Username and password must be supplied to login"});
         return;
     }
 
@@ -222,7 +220,7 @@ function registerUser(req, res) {
     const usernameToLogin = req.body.username;
     const passwordToLogin = req.body.password;
     if (!usernameToLogin || !passwordToLogin) {
-        res.render('error.njk', { error: "Username and password must be supplied to register" });
+        res.render('error.njk', {error: "Username and password must be supplied to register"});
         return;
     }
 
@@ -306,29 +304,26 @@ function createPost(req, res) {
 
 async function getPost(req, res) {
     const postId = req.params.postid;
-    const likeCount = await getLikeCount(req, postId)
-    console.log(likeCount);
+    const likeData = await getLikeCount(req, postId)
 
-        fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {//
+    fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {//
 
-            console.log(likeCount);
-            let postData = response.data;
-            postData = {...postData, likeCount: likeCount};
+        let postData = response.data;
+        postData = {...postData, likeCount: likeData.likeCount, userLiked: likeData.userLiked};
 
-            console.log(likeCount);
-            let data = extendRenderData({
-                post: postData,
-                username: getJwtUser(req.cookies),
-                isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
-                baseData: baseRequestFactory.baseData
-            }, req);
+        let data = extendRenderData({
+            post: postData,
+            username: getJwtUser(req.cookies),
+            isAdManager: hasJwtRole(req.cookies, roles.AD_MANAGER),
+            baseData: baseRequestFactory.baseData
+        }, req);
 
-            res.render('singlepost.njk', data);
-        }, (err) => displayError(err, res))
+        res.render('singlepost.njk', data);
+    }, (err) => displayError(err, res))
 }
 
 function postMembership(req, res) {
-    const membership = { userid: getJwtUserId(req.cookies), membership: req.body.membershipText };
+    const membership = {userid: getJwtUserId(req.cookies), membership: req.body.membershipText};
     fetchUsingDeploymentBase(req, () => req.MEMBERSHIP_SERVICE_API.post('/', membership)).then((response) => {
         res.redirect(extendURL(`/user/${getJwtUser(req.cookies)}`));
     }, (error) => res.status(statusCodeForError(error)).render('error.njk', handleError(error)));
@@ -346,46 +341,53 @@ function postBio(req, res) {
         .then((_) => {
             res.redirect(extendURL(`/user/${getJwtUser(req.cookies)}`));
         }).catch(error => {
-            res.status(statusCodeForError(error)).render('error.njk', handleError(error));
-        });
+        res.status(statusCodeForError(error)).render('error.njk', handleError(error));
+    });
 }
 
 function postLike(req, res) {
-    console.log("Something");
-    fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/ping`)).then((response => { //todo /like-count
-        let countData = response.data;
-        count = countData.likeCount;
-    }));
+    const postId = req.params.postId;
+    fetchUsingDeploymentBase(req, () => req.LIKE_SERVICE_API.get(`/like-service/like-count/` + postId)
+    ).then((response => {
+        let likeData = response.data;
+        if (likeData.userLiked) {
+            console.log(postId)
+            fetchUsingDeploymentBase(req, () => req.LIKE_SERVICE_API.post(`/like-service/like-delete`, {postId: postId})).then(response => {
+                res.redirect(extendURL('/post/' + postId))
+            });
+        } else {
+            fetchUsingDeploymentBase(req, () => req.LIKE_SERVICE_API.post(`/like-service/like-post`, {postId: postId}
+            )).then((response => {
+                res.redirect(extendURL('/post/' + postId))
+            }))
+        }
+    }))
 }
 
-async function getLikeCount(req, postId){
-    return new Promise((resolve, reject)=>{
-        fetchUsingDeploymentBase(req, ()=> req.LIKE_SERVICE_API.get(`/like-service/like-count`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    'postId': postId,
-                }
-            }
-        )).then((response => {
+
+async function getLikeCount(req, postId) {
+    return new Promise((resolve, reject) => {
+        fetchUsingDeploymentBase(req, () => req.LIKE_SERVICE_API.get(`/like-service/like-count/` + postId)
+        ).then((response => {
             let countData = response.data;
-            resolve(countData.likeCount);
+            resolve(countData);
         }))
     })
 
 }
 
-async function insertLikeCountIntoPostArray(req, data){
+async function insertLikeCountIntoPostArray(req, data) {
     return new Promise(async (resolve, reject) => {
         let finalData = [];
         await Promise.all(
             data.map(async (post) => {
-            let postId = post.postId;
-            let likeCount = await getLikeCount(req, postId);
-            post = {...post, likeCount: likeCount};
-            console.log("Post: "+ JSON.stringify(post));
-            finalData.push(post);
-        })).then(() => {
-            console.log(JSON.stringify(finalData));
+                let postId = post.postId;
+                let likeData = await getLikeCount(req, postId);
+                let likeCount = likeData.likeCount;
+                let userLiked = likeData.userLiked;
+                post = {...post, likeCount: likeCount, userLiked: userLiked};
+                finalData.push(post);
+            })).then(() => {
             resolve(finalData);
         })
     })
@@ -397,7 +399,7 @@ async function insertLikeCountIntoPostArray(req, data){
  * nunjucks, allowing microservice failures to not affect base requests. e.g deployment service requests will always succeed
  * regardless if login fails.
  *
- * @param req express req context
+ * @param req express req contextmy-timeline
  * @param requestToAttach function that returns an Axios request to be made after base requests finishes e.g () => Axios.get(url)
  */
 function baseRequestFactory(req, requestToAttach) {

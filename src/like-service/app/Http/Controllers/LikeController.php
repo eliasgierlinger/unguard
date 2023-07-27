@@ -17,7 +17,9 @@ class LikeController extends BaseController
     function doLike($request)
     {
         $user_token = $request->cookie('jwt');
-        $postId = $request->header('postId');
+        $postId = $request->input('postId');
+
+        Log::notice($request->all());
 
         if (!$this->validateToken($user_token)) {
             return response()->json([
@@ -38,7 +40,9 @@ class LikeController extends BaseController
     function getLikeCountAndState($request)
     {
         $user_token = $request->cookie('jwt');
-        $postId = $request->header('postId');
+        $uri = $request->path();
+        $uriParts = explode('/', $uri);
+        $postId = $uriParts[2];
 
         DB::enableQueryLog();
         if (!$this->validateToken($user_token)) {
@@ -66,6 +70,7 @@ class LikeController extends BaseController
  */
     function removeLike($request)
     {
+        DB::enableQueryLog();
         $user_token = $request->cookie('jwt');
         $postId = $request->input('postId');
 
@@ -86,6 +91,8 @@ class LikeController extends BaseController
         $bindings = array_slice($bindings, 0, 2);
 
         $query->setBindings($bindings)->delete();
+
+        Log::notice(DB::getQueryLog());;
 
         return response()->json([
             'userId' => $userId,

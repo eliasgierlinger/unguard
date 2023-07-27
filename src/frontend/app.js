@@ -132,8 +132,8 @@ function createAxiosInstance(req, baseURL, logger, headers) {
     return axiosInstace;
 }
 
-// setup 6 custom axios instances configured to talk to each microservice respectively
-// (MICROBLOG_API, PROXY, USER_AUTH_API, AD_SERVICE_API, PROFILE_SERVICE_API and STATUS_SERVICE_API). All with Jaeger tracing enabled
+// setup 7 custom axios instances configured to talk to each microservice respectively
+// (MICROBLOG_API, PROXY, USER_AUTH_API, AD_SERVICE_API, PROFILE_SERVICE_API, LIKE_SERVICE_API and STATUS_SERVICE_API). All with Jaeger tracing enabled
 app.use((req, res, next) => {
     const cookieHeader = req.cookies.jwt ? {"Cookie": "jwt=" + req.cookies.jwt} : {};
 
