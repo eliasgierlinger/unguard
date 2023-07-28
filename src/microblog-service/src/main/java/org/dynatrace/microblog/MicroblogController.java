@@ -126,9 +126,7 @@ public class MicroblogController {
 
         if (!userAuthServiceClient.checkTokenValidity(jwt)) throw new InvalidJwtException();
 
-        List<Post> postList = redisClient.getUserPosts(jwt, user, Integer.parseInt(limit));
-        logger.info(postList.get(1).getPostId());
-        return postList;
+        return redisClient.getUserPosts(jwt, user, Integer.parseInt(limit));
     }
 
     @GetMapping("/users/{user}/followers")

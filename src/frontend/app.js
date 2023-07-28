@@ -63,7 +63,7 @@ frontendLogger.info("FRONTEND_BASE_PATH is set to " + process.env.FRONTEND_BASE_
 frontendLogger.info("AD_SERVICE_BASE_PATH is set to " + process.env.AD_SERVICE_BASE_PATH);
 frontendLogger.info("STATUS_SERVICE_BASE_PATH is set to " + process.env.STATUS_SERVICE_BASE_PATH);
 frontendLogger.info("PROFILE_SERVICE_ADDRESS is set to " + process.env.PROFILE_SERVICE_ADDRESS);
-frontendLogger.info("LIKE_SERVICE_ADDRESS is set to " + process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT);
+frontendLogger.info("LIKE_SERVICE_ADDRESS is set to " + process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT); //TODO: find out why LIKE_SERVICE_ADDRESS does not work
 
 let app = express();
 
@@ -145,7 +145,6 @@ app.use((req, res, next) => {
     const PROFILE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.PROFILE_SERVICE_ADDRESS, profileServiceLogger);
     const STATUS_SERVICE_API =createAxiosInstance(req, "http://" + process.env.STATUS_SERVICE_ADDRESS + process.env.STATUS_SERVICE_BASE_PATH, statusServiceApiLogger);
     const LIKE_SERVICE_API = createAxiosInstance(req, "http://" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_HOST + ":" + process.env.UNGUARD_LIKE_SERVICE_SERVICE_PORT, likeServiceLogger, cookieHeader);
-
 
 	applyTracingInterceptors(MICROBLOG_API, {span: req.span});
 	applyTracingInterceptors(PROXY, {span: req.span});

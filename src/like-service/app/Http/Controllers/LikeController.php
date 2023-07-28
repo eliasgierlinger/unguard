@@ -8,7 +8,6 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class LikeController extends BaseController
 {
@@ -18,8 +17,6 @@ class LikeController extends BaseController
     {
         $user_token = $request->cookie('jwt');
         $postId = $request->input('postId');
-
-        Log::notice($request->all());
 
         if (!$this->validateToken($user_token)) {
             return response()->json([
@@ -44,7 +41,6 @@ class LikeController extends BaseController
         $uriParts = explode('/', $uri);
         $postId = $uriParts[2];
 
-        DB::enableQueryLog();
         if (!$this->validateToken($user_token)) {
             return response()->json([
                 'message' => 'Unauthorized'
@@ -55,7 +51,6 @@ class LikeController extends BaseController
         $count = DB::table('like')->where('postId', '=', $postId)->count('*');
         $userLiked = DB::table('like')->where('userId', '=', $userId)->where('postId', '=', $postId)->count('*') > 0;
 
-        Log::notice(DB::getQueryLog());;
 
         return response()->json([
             'likeCount' => $count,
@@ -70,7 +65,6 @@ class LikeController extends BaseController
  */
     function removeLike($request)
     {
-        DB::enableQueryLog();
         $user_token = $request->cookie('jwt');
         $postId = $request->input('postId');
 
@@ -92,8 +86,6 @@ class LikeController extends BaseController
 
         $query->setBindings($bindings)->delete();
 
-        Log::notice(DB::getQueryLog());;
-
         return response()->json([
             'userId' => $userId,
         ], 200);
@@ -102,8 +94,6 @@ class LikeController extends BaseController
     function validateToken($user_token)
     {
         $auth_service_validate_host = config('app.auth_service_url');
-
-        Log::notice('Sending request to: ' . $auth_service_validate_host);
 
         $response = Http::post($auth_service_validate_host, [
             'jwt' => $user_token

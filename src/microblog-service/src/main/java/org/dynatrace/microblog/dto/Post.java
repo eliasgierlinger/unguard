@@ -28,11 +28,11 @@ public class Post {
     private final String postId;
 
     public Post(
-			@JsonProperty("username") String username,
-			@JsonProperty("body") String body,
-			@JsonProperty("imageUrl") String imageUrl,
-			@JsonProperty("timestamp") Date timestamp,
-            @JsonProperty("postId") String postId){
+        @JsonProperty("username") String username,
+        @JsonProperty("body") String body,
+        @JsonProperty("imageUrl") String imageUrl,
+        @JsonProperty("timestamp") Date timestamp,
+        @JsonProperty("postId") String postId) {
         this.username = username;
         this.body = body;
         this.imageUrl = imageUrl;
@@ -56,5 +56,7 @@ public class Post {
         return imageUrl;
     }
 
-    public String getPostId(){ return postId; };
+    public String getPostId() {
+        return postId;
+    }
 }
