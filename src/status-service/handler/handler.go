@@ -113,7 +113,9 @@ func GetUsers(c echo.Context) error {
 	defer cancel()
 
 	// this allows injecting SQL code
-	sql_stmt := "SELECT users.id, users.username, roles.name as role_name FROM users LEFT JOIN users_roles ON users.id=users_roles.user_id LEFT JOIN roles ON roles.id=users_roles.role_id WHERE users.username LIKE '%%" + nameFilter + "%%'"
+	sql_stmt := "SELECT users.id, users.username, roles.name as role_name FROM users " +
+		"LEFT JOIN users_roles ON users.id=users_roles.user_id " +
+		"LEFT JOIN roles ON roles.id=users_roles.role_id WHERE users.username LIKE '%%" + nameFilter + "%%'"
 	if len(roles) > 0 {
 		// this also allows injecting SQL code
 		sql_stmt += " and roles.name in ('" + strings.Join(roles, "', '") + "')"
