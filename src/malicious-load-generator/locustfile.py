@@ -155,6 +155,15 @@ class UnguardUser(HttpUser):
         self.client.post("/membership/" + self.get_running_username(), data=sql_membership, headers=self.get_random_x_forwarded_for_header())
         time.sleep(1)
 
+    @task()
+    def post_sql_php(self):
+        post_id = 1
+        user_id = 1
+
+        # try to remove the like of the admanger account (user ID 1) on the first post (post ID 1).
+        self.client.get("/post", params={'postId': [post_id, user_id], 'like_delete': ''}, headers=self.get_random_x_forwarded_for_header())
+        time.sleep(1)
+
     def on_start(self):
         curr_user = self.get_running_username()
         # super secure passwords :)
