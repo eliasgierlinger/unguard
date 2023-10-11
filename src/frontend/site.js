@@ -359,7 +359,7 @@ async function getPost(req, res) {
 
     const likeData = await getLikeCount(req, postId)
 
-    fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {//
+    fetchUsingDeploymentBase(req, () => req.MICROBLOG_API.get(`/post/${postId}`)).then((response) => {
 
         let postData = response.data;
         postData = {...postData, likeCount: likeData.likeCount, userLiked: likeData.userLiked};
@@ -394,8 +394,8 @@ function postBio(req, res) {
         .then((_) => {
             res.redirect(extendURL(`/user/${getJwtUser(req.cookies)}`));
         }).catch(error => {
-        res.status(statusCodeForError(error)).render('error.njk', handleError(error));
-    });
+            res.status(statusCodeForError(error)).render('error.njk', handleError(error));
+        });
 }
 
 
